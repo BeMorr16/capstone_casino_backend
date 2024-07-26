@@ -44,8 +44,8 @@ async function getMostMoneyQuery() {
     try {
         const SQL = `
         SELECT username, user_money
-        FROM users
-        ORDER BY money DESC
+        FROM users WHERE is_admin = false
+        ORDER BY user_money DESC
         LIMIT 5;`;
         const leaderboard = await client.query(SQL);
         return leaderboard.rows;

@@ -1,5 +1,5 @@
 const { jwt, bcrypt, client, uuid } = require("../shared");
-const JWT = process.env.JWT || 'sshhh';
+const JWT = process.env.JWT || '12345';
 
 async function registerQuery(reqBody) {
     const { username, email, password, mode} = reqBody
@@ -99,7 +99,7 @@ async function editUserQuery(reqBody) {
     user_money = COALESCE(user_money, 0) + COALESCE($4, 0),
     wins = COALESCE(wins, 0) + COALESCE($5, 0),
     losses = COALESCE(losses, 0) + COALESCE($6, 0)
-    WHERE id=$4
+    WHERE id=$7
     RETURNING *;`;
     const response = await client.query(SQL, params);
     if (!response.rows.length) {
