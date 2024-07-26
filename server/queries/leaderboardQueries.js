@@ -43,7 +43,7 @@ try {
 async function getMostMoneyQuery() {
     try {
         const SQL = `
-        SELECT username, money
+        SELECT username, user_money
         FROM users
         ORDER BY money DESC
         LIMIT 5;`;

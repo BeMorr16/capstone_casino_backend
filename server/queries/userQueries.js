@@ -10,18 +10,21 @@ async function registerQuery(reqBody) {
         money = 10000
         goal = 50000
     } else if (mode === 2) {
-        money = 10000
-        goal = 100000
+        money = 5000
+        goal = 50000
+    } else if (mode === 3){
+        money = 1000
+        goal = 50000
     } else {
-        money = 15000
-        goal = 500000
+        money = 100
+        goal = 50000
     }
     let is_admin = false;
-    if (email === "bemorrison16@gmail.com" || email === "david@email" || email === "jose@email") {
+    if (email === "bemorrison16@gmail.com" || email === "davidtoelle54@gmail.com" || email === "josehumberto2002@gmail.com") {
         is_admin = true;
     }
     const SQL = `
-    INSERT INTO users(id, username, email, password, money, goal, is_admin) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`;
+    INSERT INTO users(id, username, email, password, user_money, goal, is_admin) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`;
     const response = await client.query(SQL, [uuid.v4(), username, email, hashedPassword, money, goal, is_admin]);
     const token = await jwt.sign({ id: response.rows[0].id }, JWT, { expiresIn: '1h' });
     return { ...response.rows[0], token };
@@ -78,7 +81,7 @@ async function getUserInfoQuery(id) {
 
 
 async function editUserQuery(reqBody) {
-    const { id, username, email, password } = reqBody;
+    const { id, username, email, password, user_money, wins, losses } = reqBody;
     if (!id) {
         const err = new Error('User ID is required in body to edit');
         err.status = 400;
@@ -86,13 +89,16 @@ async function editUserQuery(reqBody) {
     }
     
     let hashedPassword = password ? await bcrypt.hash(password, 10) : null;
-    let params = [username ? username : null, email ? email : null, password ? hashedPassword : null, id];
+    let params = [username ? username : null, email ? email : null, password ? hashedPassword : null, user_money ? user_money : null, wins ? wins : null, losses ? losses : null, id];
     const SQL = `
     UPDATE users
     SET
     username = COALESCE($1, username),
     email = COALESCE($2, email),
-    password = COALESCE($3, password)
+    password = COALESCE($3, password),
+    user_money = COALESCE(user_money, 0) + COALESCE($4, 0),
+    wins = COALESCE(wins, 0) + COALESCE($5, 0),
+    losses = COALESCE(losses, 0) + COALESCE($6, 0)
     WHERE id=$4
     RETURNING *;`;
     const response = await client.query(SQL, params);
