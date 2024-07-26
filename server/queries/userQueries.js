@@ -81,15 +81,23 @@ async function getUserInfoQuery(id) {
 
 
 async function editUserQuery(reqBody) {
-    const { id, username, email, password, user_money, wins, losses } = reqBody;
+    const { id, username, email, password, money, win_loss } = reqBody;
     if (!id) {
         const err = new Error('User ID is required in body to edit');
         err.status = 400;
         throw err;
     }
+    let wins = null;
+    let losses = null;
+    if (win_loss) {
+        wins = 1;
+    } else {
+        losses = 1;
+    }
     
+
     let hashedPassword = password ? await bcrypt.hash(password, 10) : null;
-    let params = [username ? username : null, email ? email : null, password ? hashedPassword : null, user_money ? user_money : null, wins ? wins : null, losses ? losses : null, id];
+    let params = [username ? username : null, email ? email : null, password ? hashedPassword : null, money ? money : null, wins ? wins : null, losses ? losses : null, id];
     const SQL = `
     UPDATE users
     SET

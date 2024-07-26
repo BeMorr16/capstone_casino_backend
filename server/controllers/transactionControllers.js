@@ -1,9 +1,11 @@
 const { getAllHistoryQuery, getSingleCategoryHistoryQuery, addTransactionQuery, getFilteredHistoryQuery } = require("../queries/transactionQueries");
+const { editUserQuery } = require("../queries/userQueries");
 
 async function addTransaction(req, res, next) {
     try {
         const transaction = await addTransactionQuery(req.body);
-        res.status(201).json(transaction)
+        const editedUser = await editUserQuery(req.body)
+        res.status(201).json({ transaction, editedUser })
     } catch (error) {
         next(error)
     }
