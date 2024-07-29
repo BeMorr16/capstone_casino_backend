@@ -91,7 +91,7 @@ async function editUserQuery(reqBody) {
     let losses = null;
     if (win_loss) {
         wins = 1;
-    } else {
+    } else if (win_loss === false) {
         losses = 1;
     }
     

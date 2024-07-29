@@ -21,9 +21,9 @@ async function getBiggestWinsQuery() {
 
 async function getBestRecordQuery() {
     const SQL = `
-    SELECT username, wins, loss,
-           (CASE WHEN wins + loss > 0 THEN 
-               ROUND((wins * 100.0 / (wins + loss)), 2)
+    SELECT username, wins, losses,
+           (CASE WHEN wins + losses > 0 THEN 
+               ROUND((wins * 100.0 / (wins + losses)), 2)
             ELSE 0
             END) AS win_percentage
     FROM users
