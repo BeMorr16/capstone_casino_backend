@@ -26,7 +26,7 @@ async function registerQuery(reqBody) {
     const SQL = `
     INSERT INTO users(id, username, email, password, user_money, goal, is_admin) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`;
     const response = await client.query(SQL, [uuid.v4(), username, email, hashedPassword, money, goal, is_admin]);
-    const token = await jwt.sign({ id: response.rows[0].id }, JWT, { expiresIn: '1h' });
+    const token = await jwt.sign({ id: response.rows[0].id }, JWT, { expiresIn: '5h' });
     return { ...response.rows[0], token };
 }
 
@@ -41,7 +41,7 @@ async function loginQuery(reqBody) {
         error.status = 401;
         throw error
     }
-    const token = await jwt.sign({ id: response.rows[0].id }, JWT, { expiresIn: '1h' });
+    const token = await jwt.sign({ id: response.rows[0].id }, JWT, { expiresIn: '5h' });
     return { ...response.rows[0], token };
 }
 
@@ -91,11 +91,9 @@ async function editUserQuery(reqBody) {
     let losses = null;
     if (win_loss) {
         wins = 1;
-    } else if (win_loss === false) {
+    } else if (win_loss === false && money !== 0) {
         losses = 1;
     }
-    
-
     let hashedPassword = password ? await bcrypt.hash(password, 10) : null;
     let params = [username ? username : null, email ? email : null, password ? hashedPassword : null, money ? money : null, wins ? wins : null, losses ? losses : null, id];
     const SQL = `

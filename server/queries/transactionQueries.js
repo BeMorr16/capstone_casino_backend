@@ -3,10 +3,9 @@ const { client, uuid } = require('../shared')
 
 async function addTransactionQuery(reqBody) {
     const { id, game, win_loss, money, result } = reqBody;
-    if (!id || !game || win_loss === undefined || !money || !result) {
-        const err = new Error('Missing required fields');
-        err.status = 400;
-        throw err;
+    let moneyDiff = money
+    if (!money) {
+        moneyDiff = 0;
     }
     const SQL = ` INSERT INTO transactions (transaction_id, user_id, game, win_loss, money, result)
         VALUES ($1, $2, $3, $4, $5, $6)
