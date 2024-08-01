@@ -13,7 +13,7 @@ async function addTransactionQuery(reqBody) {
     let params = [uuid.v4(), id, game, win_loss, money, result];
     if (miniGame) {
         SQL = `INSERT INTO miniGame(id, user_id, game, endTotal, perfectGame, total_wins)
-        VALUES ($1, $2, $3, $4, $5)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *;`
         params = [uuid.v4(), id, game, endTotal, perfectGame, total_wins];
     }
