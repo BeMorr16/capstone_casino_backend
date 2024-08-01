@@ -66,7 +66,7 @@ async function getUserInfoQuery(id) {
 }
 
 
-async function editUserQuery(reqBody) {
+async function editUserQuery(reqBody, reqUser) {
     const { id, username, email, password, confirmPassword, money, win_loss, game } = reqBody;
    try {
     if (!id) {
@@ -81,9 +81,9 @@ async function editUserQuery(reqBody) {
     } else if (win_loss === false && money !== 0 && game !== "slots") {
         losses = 1;
     }
-       let passwordToAdd = null;
+    let passwordToAdd = null;
     if (password) {
-        const user = req.user
+        const user = reqUser
         const isMatch = await bcrypt.compare(confirmPassword, user.password);
         if (!isMatch) {
             const err = new Error('Incorrect current password');
@@ -113,7 +113,7 @@ async function editUserQuery(reqBody) {
     return response.rows[0];
    } catch (error) {
         const err = new Error('Error editing user', error.message);
-        err.status = 500;
+       err.status = 500;
         throw err;
    }
 }

@@ -31,7 +31,7 @@ async function getUserInfo(req, res, next) {
 
 async function editUser(req, res, next) {
     try {
-        const updatedUser = await editUserQuery(req.body);
+        const updatedUser = await editUserQuery(req.body, req.user);
         res.status(201).json(updatedUser)
     } catch (error) {
         next(error)
