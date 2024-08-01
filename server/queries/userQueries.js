@@ -2,30 +2,16 @@ const { jwt, bcrypt, client, uuid } = require("../shared");
 const JWT = process.env.JWT || '12345';
 
 async function registerQuery(reqBody) {
-    const { username, email, password, mode} = reqBody
+    const { username, email, password} = reqBody
     const hashedPassword = await bcrypt.hash(password, 10);
-    let money;
-    let goal;
-    if (mode === 1) {
-        money = 10000
-        goal = 50000
-    } else if (mode === 2) {
-        money = 5000
-        goal = 50000
-    } else if (mode === 3){
-        money = 1000
-        goal = 50000
-    } else {
-        money = 100
-        goal = 50000
-    }
+    let money = 5000;
     let is_admin = false;
     if (email === "bemorrison16@gmail.com" || email === "davidtoelle54@gmail.com" || email === "josehumberto2002@gmail.com") {
         is_admin = true;
     }
     const SQL = `
-    INSERT INTO users(id, username, email, password, user_money, goal, is_admin) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`;
-    const response = await client.query(SQL, [uuid.v4(), username, email, hashedPassword, money, goal, is_admin]);
+    INSERT INTO users(id, username, email, password, user_money, is_admin) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;`;
+    const response = await client.query(SQL, [uuid.v4(), username, email, hashedPassword, money, is_admin]);
     const token = await jwt.sign({ id: response.rows[0].id }, JWT, { expiresIn: '5h' });
     return { ...response.rows[0], token };
 }
@@ -81,7 +67,7 @@ async function getUserInfoQuery(id) {
 
 
 async function editUserQuery(reqBody) {
-    const { id, username, email, password, money, win_loss } = reqBody;
+    const { id, username, email, password, money, win_loss, game } = reqBody;
     if (!id) {
         const err = new Error('User ID is required in body to edit');
         err.status = 400;
@@ -89,9 +75,9 @@ async function editUserQuery(reqBody) {
     }
     let wins = null;
     let losses = null;
-    if (win_loss) {
+    if (win_loss && game !== "slots") {
         wins = 1;
-    } else if (win_loss === false && money !== 0) {
+    } else if (win_loss === false && money !== 0 && game !== "slots") {
         losses = 1;
     }
     let hashedPassword = password ? await bcrypt.hash(password, 10) : null;

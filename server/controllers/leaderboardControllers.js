@@ -1,4 +1,4 @@
-const { getBiggestWinsQuery, getBestRecordQuery, getMostMoneyQuery } = require("../queries/leaderboardQueries");
+const { getBiggestWinsQuery, getBestRecordQuery, getMostMoneyQuery, getMiniGameStatsQuery, getPerfectMiniGamesQuery } = require("../queries/leaderboardQueries");
 
 
 async function getBiggestWins(req, res, next) {
@@ -25,7 +25,23 @@ async function getUserLeaderboards(req, res, next) {
     }
 }
 
+async function getMiniGameStats(req, res, next) {
+    try {
+        const { perfect } = req.params;
+        if (perfect === 'perfect') {
+            const leaderboard = await getPerfectMiniGamesQuery();
+            res.status(200).json(leaderboard)
+        } else {
+            const leaderboard = await getMiniGameStatsQuery();
+            res.status(200).json(leaderboard)
+        }
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
     getBiggestWins,
-    getUserLeaderboards
+    getUserLeaderboards,
+    getMiniGameStats
 }

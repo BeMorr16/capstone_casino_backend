@@ -4,15 +4,48 @@ const {client} = require('../shared')
 async function getBiggestWinsQuery() {
     try {
         const SQL = `
-        SELECT * 
-        FROM transactions
-        WHERE win_loss = true
-        ORDER BY money DESC
+        SELECT t.*, u.username 
+        FROM transactions t
+        JOIN users u ON t.user_id = u.id
+        WHERE t.win_loss = true
+        ORDER BY t.money DESC
         LIMIT 10;`;
         const leaderboard = await client.query(SQL);
         return leaderboard.rows;
     } catch (error) {
         const err = new Error('Error fetching biggest wins: ' + error.message);
+        err.status = 500;
+        throw err
+    }
+}
+
+async function getMiniGameStatsQuery() {
+    try {
+        const SQL = `
+        SELECT m.*, u.username
+        FROM miniGame m
+        JOIN users u ON m.user_id = u.id
+        ORDER BY m.endTotal DESC
+        LIMIT 10;`
+        const leaderboard = await client.query(SQL);
+        return leaderboard.rows
+    } catch (error) {
+        const err = new Error('Error fetching miniGame Stats:', error.message)
+        err.status = 500;
+        throw err
+    }
+}
+async function getPerfectMiniGamesQuery() {
+    try {
+        const SQL = `
+        SELECT m.*, u.username
+        FROM miniGame m
+        JOIN users u ON m.user_id = u.id
+        WHERE m.perfectGame = true;`
+        const leaderboard = await client.query(SQL);
+        return leaderboard.rows
+    } catch (error) {
+        const err = new Error('Error fetching miniGame Stats:', error)
         err.status = 500;
         throw err
     }
@@ -58,7 +91,9 @@ async function getMostMoneyQuery() {
 
 
 module.exports = {
-    getBiggestWinsQuery, 
+    getBiggestWinsQuery,
+    getMiniGameStatsQuery,
+    getPerfectMiniGamesQuery,
     getBestRecordQuery,
     getMostMoneyQuery
 }

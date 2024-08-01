@@ -2,15 +2,21 @@ const { client, uuid } = require('../shared')
 
 
 async function addTransactionQuery(reqBody) {
-    const { id, game, win_loss, money, result } = reqBody;
+    const { id, game, win_loss, money, result, miniGame, perfectGame, total_wins} = reqBody;
     let moneyDiff = money
     if (!money) {
         moneyDiff = 0;
     }
-    const SQL = ` INSERT INTO transactions (transaction_id, user_id, game, win_loss, money, result)
+    let SQL = ` INSERT INTO transactions (transaction_id, user_id, game, win_loss, money, result)
         VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *;`;
-    const params = [uuid.v4(), id, game, win_loss, money, result];
+    let params = [uuid.v4(), id, game, win_loss, money, result];
+    if (miniGame) {
+        SQL = `INSERT INTO miniGame(id, user_id, game, endTotal, perfectGame, total_wins)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *;`
+        params = [uuid.v4(), id, game, money, perfectGame, total_wins];
+    }
     const response = await client.query(SQL, params);
     if (!response.rows.length) {
         const err = new Error('Transaction could not be added');
