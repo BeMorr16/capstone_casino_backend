@@ -67,7 +67,8 @@ async function getUserInfoQuery(id) {
 
 
 async function editUserQuery(reqBody) {
-    const { id, username, email, password, money, win_loss, game } = reqBody;
+    const { id, username, email, password, confirmPassword, money, win_loss, game } = reqBody;
+   try {
     if (!id) {
         const err = new Error('User ID is required in body to edit');
         err.status = 400;
@@ -80,8 +81,18 @@ async function editUserQuery(reqBody) {
     } else if (win_loss === false && money !== 0 && game !== "slots") {
         losses = 1;
     }
-    let hashedPassword = password ? await bcrypt.hash(password, 10) : null;
-    let params = [username ? username : null, email ? email : null, password ? hashedPassword : null, money ? money : null, wins ? wins : null, losses ? losses : null, id];
+       let passwordToAdd = null;
+    if (password) {
+        const user = req.user
+        const isMatch = await bcrypt.compare(confirmPassword, user.password);
+        if (!isMatch) {
+            const err = new Error('Incorrect current password');
+            err.status = 400;
+            throw err;
+        }
+        passwordToAdd = password ? await bcrypt.hash(password, 10) : null;
+    }
+    let params = [username ? username : null, email ? email : null, passwordToAdd || null, money ? money : null, wins ? wins : null, losses ? losses : null, id];
     const SQL = `
     UPDATE users
     SET
@@ -100,6 +111,11 @@ async function editUserQuery(reqBody) {
         throw err;
     }
     return response.rows[0];
+   } catch (error) {
+        const err = new Error('Error editing user', error.message);
+        err.status = 500;
+        throw err;
+   }
 }
 
 module.exports = {
