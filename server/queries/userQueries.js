@@ -43,7 +43,7 @@ async function findUserWithToken(token) {
         throw err;
     }
     const SQL = `
-    SELECT id, username FROM users WHERE id=$1;`;
+    SELECT id, username, password FROM users WHERE id=$1;`;
     const response = await client.query(SQL, [id]);
     if (!response.rows.length) {
         const err = Error('Not authorized');
@@ -68,7 +68,7 @@ async function getUserInfoQuery(id) {
 
 async function editUserQuery(reqBody, reqUser) {
     const { id, username, email, password, confirmPassword, money, win_loss, game } = reqBody;
-   try {
+    try {
     if (!id) {
         const err = new Error('User ID is required in body to edit');
         err.status = 400;
@@ -82,9 +82,9 @@ async function editUserQuery(reqBody, reqUser) {
         losses = 1;
     }
     let passwordToAdd = null;
-    if (password) {
+        if (password) {
         const user = reqUser
-        const isMatch = await bcrypt.compare(confirmPassword, user.password);
+            const isMatch = await bcrypt.compare(confirmPassword, user.password);
         if (!isMatch) {
             const err = new Error('Incorrect current password');
             err.status = 400;
@@ -93,7 +93,7 @@ async function editUserQuery(reqBody, reqUser) {
         passwordToAdd = password ? await bcrypt.hash(password, 10) : null;
     }
     let params = [username ? username : null, email ? email : null, passwordToAdd || null, money ? money : null, wins ? wins : null, losses ? losses : null, id];
-    const SQL = `
+        const SQL = `
     UPDATE users
     SET
     username = COALESCE($1, username),
@@ -104,7 +104,7 @@ async function editUserQuery(reqBody, reqUser) {
     losses = COALESCE(losses, 0) + COALESCE($6, 0)
     WHERE id=$7
     RETURNING *;`;
-    const response = await client.query(SQL, params);
+        const response = await client.query(SQL, params);
     if (!response.rows.length) {
         const err = new Error('No user found');
         err.status = 404;
