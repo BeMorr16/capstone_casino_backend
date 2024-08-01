@@ -2,7 +2,7 @@ const { client, uuid } = require('../shared')
 
 
 async function addTransactionQuery(reqBody) {
-    const { id, game, win_loss, money, result, miniGame, perfectGame, total_wins} = reqBody;
+    const { id, game, win_loss, money, result, endTotal, miniGame, perfectGame, total_wins} = reqBody;
     let moneyDiff = money
     if (!money) {
         moneyDiff = 0;
@@ -15,7 +15,7 @@ async function addTransactionQuery(reqBody) {
         SQL = `INSERT INTO miniGame(id, user_id, game, endTotal, perfectGame, total_wins)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING *;`
-        params = [uuid.v4(), id, game, money, perfectGame, total_wins];
+        params = [uuid.v4(), id, game, endTotal, perfectGame, total_wins];
     }
     const response = await client.query(SQL, params);
     if (!response.rows.length) {
