@@ -1,8 +1,10 @@
 const { client, uuid, bcrypt } = require("./shared");
 console.log("Database URL:", process.env.DATABASE_URL);
+
 async function createTables() {
-  await client.connect();
-  let SQL = `
+  try {
+    await client.connect();
+    let SQL = `
     CREATE TABLE IF NOT EXISTS users(
     id UUID PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,
@@ -31,26 +33,30 @@ async function createTables() {
     total_wins INTEGER NOT NULL, 
     completed_at TIMESTAMP DEFAULT now()
     );`;
-    
+
     await client.query(SQL);
-    const password = "adminPassword123"
+    const password = "adminPassword123";
     const hashedPassword = await bcrypt.hash(password, 10);
-  SQL = `
+    const insertUserSQL = `
     INSERT INTO users (id, username, email, password, user_money, wins, losses, is_admin)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-    ;`;
-    await client.query(SQL, [uuid.v4(), "benmo", "bemorrison16@gmail.com", hashedPassword, 1000000, 0, 0, true])
-  SQL = `
-    INSERT INTO users (id, username, email, password, user_money, wins, losses, is_admin)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-    ;`;
-    await client.query(SQL, [uuid.v4(), "david", "davidtoelle54@gmail.com", hashedPassword, 1000000, 0, 0, true])
-  SQL = `
-    INSERT INTO users (id, username, email, password, user_money, wins, losses, is_admin)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-    ;`;
-    await client.query(SQL, [uuid.v4(), "jose", "josehumberto2002@gmail.com", hashedPassword, 1000000, 0, 0, true])
-  await client.end();
+  `;
+
+    const users = [
+      { username: "benmo", email: "bemorrison16@gmail.com" },
+      { username: "david", email: "davidtoelle54@gmail.com" },
+      { username: "jose", email: "josehumberto2002@gmail.com" },
+    ];
+
+    for (const user of users) {
+      await client.query(insertUserSQL, [uuid.v4(), user.username, user.email, hashedPassword, 1000000, 0, 0, true,]);
+    }
+    console.log("Tables created and seeded successfully.");
+  } catch (error) {
+    console.error("Error creating tables or seeding data:", error);
+  } finally {
+    await client.end();
+  }
 }
 
 createTables();

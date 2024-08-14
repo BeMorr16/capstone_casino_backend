@@ -24,10 +24,15 @@ app.use((err, req, res, next)=> {
   
 async function init() {
     const PORT = process.env.PORT || 8080;
-    await client.connect();
-    console.log("connected to DB")
-    app.listen(PORT, () => {
-        console.log(`Listening on Port ${PORT}...`)
-    });
+    try {
+        await client.connect();
+        console.log("connected to DB")
+        app.listen(PORT, () => {
+            console.log(`Listening on Port ${PORT}...`)
+        });
+    } catch (error) {
+        console.error("Error initializing server:", error);
+        process.exit(1);
+    }
 }
 init();

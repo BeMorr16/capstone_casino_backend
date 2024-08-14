@@ -2,33 +2,39 @@ const { jwt, bcrypt, client, uuid } = require("../shared");
 const JWT = process.env.JWT || '12345';
 
 async function registerQuery(reqBody) {
-    const { username, email, password} = reqBody
-    const hashedPassword = await bcrypt.hash(password, 10);
-    let money = 5000;
-    let is_admin = false;
-    if (email === "bemorrison16@gmail.com" || email === "davidtoelle54@gmail.com" || email === "josehumberto2002@gmail.com") {
-        is_admin = true;
+    try {
+        const { username, email, password} = reqBody
+        const hashedPassword = await bcrypt.hash(password, 10);
+        let money = 5000;
+        let is_admin = false;
+        if (["bemorrison16@gmail.com", "davidtoelle54@gmail.com", "josehumberto2002@gmail.com"].includes(email)) {
+                is_admin = true;
+            }
+        const SQL = `INSERT INTO users(id, username, email, password, user_money, is_admin) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;`;
+        const response = await client.query(SQL, [uuid.v4(), username, email, hashedPassword, money, is_admin]);
+        const token = await jwt.sign({ id: response.rows[0].id }, JWT, { expiresIn: '5h' });
+        return { ...response.rows[0], token };
+    } catch (error) {
+        throw new Error(`Error registering user: ${error.message}`);
     }
-    const SQL = `
-    INSERT INTO users(id, username, email, password, user_money, is_admin) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;`;
-    const response = await client.query(SQL, [uuid.v4(), username, email, hashedPassword, money, is_admin]);
-    const token = await jwt.sign({ id: response.rows[0].id }, JWT, { expiresIn: '5h' });
-    return { ...response.rows[0], token };
 }
 
 
 async function loginQuery(reqBody) {
-    const { username, password } = reqBody;
-    const SQL = `
-    SELECT * FROM users WHERE username=$1;`;
-    const response = await client.query(SQL, [username]);
-    if (!response.rows.length || (await bcrypt.compare(password, response.rows[0].password)) === false) {
-        const error = Error('Invalid username and/or password')
-        error.status = 401;
-        throw error
+    try {
+        const { username, password } = reqBody;
+        const SQL = `SELECT * FROM users WHERE username=$1;`;
+        const response = await client.query(SQL, [username]);
+        if (!response.rows.length || (await bcrypt.compare(password, response.rows[0].password)) === false) {
+            const error = Error('Invalid username and/or password')
+            error.status = 401;
+            throw error
+        }
+        const token = await jwt.sign({ id: response.rows[0].id }, JWT, { expiresIn: '5h' });
+        return { ...response.rows[0], token };
+    } catch (error) {
+        throw new Error(`Error logging in user: ${error.message}`);
     }
-    const token = await jwt.sign({ id: response.rows[0].id }, JWT, { expiresIn: '5h' });
-    return { ...response.rows[0], token };
 }
 
 
@@ -54,21 +60,24 @@ async function findUserWithToken(token) {
 }
 
 async function getUserInfoQuery(id) {
-    const SQL = `
-    SELECT * FROM users WHERE id=$1;`;
-    const response = await client.query(SQL, [id]);
-    if (!response.rows.length) {
-        const err = Error('No user found');
-        err.status = 401;
-        throw err;
+    try {
+        const SQL = `SELECT * FROM users WHERE id=$1;`;
+        const response = await client.query(SQL, [id]);
+        if (!response.rows.length) {
+            const err = Error('No user found');
+            err.status = 401;
+            throw err;
+        }
+        return response.rows[0]
+    } catch (error) {
+        throw new Error(`Error getting user information: ${error.message}`);
     }
-    return response.rows[0]
 }
 
 
 async function editUserQuery(reqBody, reqUser) {
-    const { id, username, email, password, confirmPassword, money, win_loss, game } = reqBody;
     try {
+        const { id, username, email, password, confirmPassword, money, win_loss, game } = reqBody;
     if (!id) {
         const err = new Error('User ID is required in body to edit');
         err.status = 400;

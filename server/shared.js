@@ -1,10 +1,11 @@
 const express = require('express');
-const app = express();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const uuid = require('uuid');
 const pg = require('pg');
 require('dotenv').config();
+
+const app = express();
 const client = new pg.Client({
     connectionString: process.env.DATABASE_URL || "postgres://localhost/casino_capstone",
     ssl: {

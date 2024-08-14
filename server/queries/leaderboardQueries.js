@@ -60,7 +60,7 @@ async function getBestRecordQuery() {
             ELSE 0
             END) AS win_percentage
     FROM users
-    ORDER BY wins DESC
+    ORDER BY win_percentage DESC
     LIMIT 5;`;
 try {
     const leaderboard = await client.query(SQL);

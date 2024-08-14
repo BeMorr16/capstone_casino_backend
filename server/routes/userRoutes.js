@@ -17,7 +17,7 @@ router.get("/auth", isLoggedIn, async (req, res, next) => {
 
 router.get("/", isLoggedIn, getUserInfo)
 
-router.put("/edit",isLoggedIn, editUser);
+router.put("/edit", isLoggedIn, editUser);
 
 
 module.exports = router;

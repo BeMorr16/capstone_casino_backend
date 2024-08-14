@@ -20,9 +20,8 @@ async function login (req, res, next) {
 }
 
 async function getUserInfo(req, res, next) {
-    const id = req.user.id;
     try {
-        const user = await getUserInfoQuery(id);
+        const user = await getUserInfoQuery(req.user.id);
         res.status(200).json(user)
     } catch (error) {
         next(error)
