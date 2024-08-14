@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post('/add', isLoggedIn, addTransaction);
 router.get('/history/:game/:win_loss?', getHistory);
-router.get('/history/minigame/:id', getPersonalMinigameStats);
+router.get('/minigame/history/:id', getPersonalMinigameStats);
 
 
 module.exports = router;
